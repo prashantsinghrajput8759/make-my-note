@@ -14,8 +14,18 @@ addbtn.addEventListener("click", function (e) {
     else {
         notesobj = JSON.parse(notes);
     }
+    let state = localStorage.getItem("state");
+    let stateobj;
+    if (state == null) {
+        stateobj = [];
+    }
+    else {
+        stateobj = JSON.parse(state);
+    }
     notesobj.push(addtxt.value);
+    stateobj.push(1);
     localStorage.setItem("notes", JSON.stringify(notesobj));
+    localStorage.setItem("state", JSON.stringify(stateobj));
     addtxt.value = "";//needs to clear the text area
     shownotes();
 
@@ -31,21 +41,49 @@ function shownotes() {
     else {
         notesobj = JSON.parse(notes);
     }
+    let state = localStorage.getItem("state");
+    if (state == null) {
+        stateobj = [];
+    }
+    else {
+        stateobj = JSON.parse(state);
+    }
     let html = "";
     notesobj.forEach(function (element, id) {
-        html += `
+
+        if (stateobj[id] == 1) {
+            html += `
         <div class="notecard  mx-2 my-2 card" style="width: 21rem;">
 
                 <div class="card-body markclass" >
                     <h5 class="card-title">Note ${id + 1}</h5>
                     <p class="card-text">${element}</p>
+                    
                     <button id="${id}" onclick="deletenotes(this.id)" class="btn btn-primary">Delete Note</button>
                    <button id="ugt" onclick="markugt(${id})" class="btn btn-success  my-3">important</button>
                 </div>
             </div>
-        `
+        `}
+        else {
+            html += `
+        <div class="notecard  mx-2 my-2 card" style="width: 21rem;">
 
+                <div class="card-body markclass" >
+                    <h5 class="card-title">Note ${id + 1}</h5>
+                    <p class="card-text">${element}</p>
+                    
+                    <button id="${id}" onclick="deletenotes(this.id)" class="btn btn-primary">Delete Note</button>
+                   <button id="ugt" onclick="markugt(${id})" class="btn btn-danger  my-3">not important</button>
+                </div>
+            </div>
+        `
+        }
+
+        // localStorage.setItem("state",JSON.stringify(arrobj));
     });
+
+
+
     let noteselem = document.getElementById("notes");
     if (notesobj.length != 0) {
         noteselem.innerHTML = html;
@@ -55,6 +93,30 @@ function shownotes() {
 
         noteselem.innerHTML = `No notes ! click on Add notes to add`;
     }
+    let noteCards = document.getElementsByClassName('notecard');
+    Array.from(noteCards).forEach(function (element, idd) {
+        // let cardTxt = element.getElementsByTagName("button")[1];
+        if (stateobj[idd] == 1) {
+
+
+
+            //cardTxt.innerText =
+            // "not important";
+            element.style.background = "#ff3300";
+            element.style.color = "white";
+
+            //val.innerText="not important";
+        }
+        else {
+
+            // cardTxt.innerText = "important";
+            element.style.background = "white";
+            element.style.color = "black";
+
+        }
+
+
+    });
 
 
 };
@@ -70,39 +132,72 @@ function deletenotes(id) {
     }
     notesobj.splice(id, 1);//delete element from index id to length 1
     localStorage.setItem("notes", JSON.stringify(notesobj));
+    let state = localStorage.getItem("state");
+    if (state == null) {
+        stateobj = [];
+    }
+    else {
+        stateobj = JSON.parse(state);
+    }
+    stateobj.splice(id, 1);//delete element from index id to length 1
+    localStorage.setItem("state", JSON.stringify(stateobj));
     shownotes();
 
 };
 function markugt(id) {
 
-    //console.log(id);
+    console.log(id);
     // let val=document.getElementById("ugt");
     //let el=document.getElementById("flip");
 
     // let obj=val.getElementById("ugt")[id];
     // console.log(val);
     let noteCards = document.getElementsByClassName('notecard');
+    let arr = localStorage.getItem("state");
+    if (arr == null) { arrobj = []; }
+    else {
+        arrobj = JSON.parse(arr);
+    }
     Array.from(noteCards).forEach(function (element, idd) {
         let cardTxt = element.getElementsByTagName("button")[1];
         if (idd == id) {
 
-            if (cardTxt.innerText == "important") {
+            /* if (cardTxt.innerText == "important") {
+                
+                 cardTxt.innerText =
+                     "not important";
+                     element.style.background="#ff3300";
+                     element.style.color="white";
+ 
+                 //val.innerText="not important";
+             }
+             else {
+ 
+                 cardTxt.innerText = "important";
+                 element.style.background="white";
+                 element.style.color="black";
+ 
+             }*/
+            if (arrobj[id] == 1) {
                 cardTxt.innerText =
                     "not important";
-                    element.style.background="#ff3300";
-                    element.style.color="white";
-
-                //val.innerText="not important";
+                element.style.background = "#ff3300";
+                element.style.color = "white";
+                arrobj[id] = 0;
             }
             else {
 
                 cardTxt.innerText = "important";
-                element.style.background="white";
-                element.style.color="black";
-
+                element.style.background = "white";
+                element.style.color = "black";
+                arrobj[id] = 1;
             }
+
         }
+        // localStorage.setItem("state",JSON.stringify(arrobj));
     });
+    localStorage.setItem("state", JSON.stringify(arrobj));
+    shownotes();
     //let cardTxt = element.getElementsByTagName("button")[1].innerText;
     // console.log(cardTxt);});
 
@@ -148,3 +243,29 @@ Further Features:
 3. Separate notes by user
 4. Sync and host to web server
 */
+//adding a div which is editable
+/*let edittxt=document.getElementById("edittext");
+console.log(edittxt);
+edittxt.addEventListener('click',function(){
+    let store=localStorage.getItem("text");
+
+    let repeat=document.getElementsByClassName("textarea").length;
+    console.log(repeat);
+    let html;
+    if(store==null)
+    { html=document.getElementById("edittext").innerText;}
+    else{
+        html=store;
+    }
+    if(repeat==0)
+
+    {let remove=document.getElementById("edittext");
+    remove.innerHTML=`<textarea class="textarea form-control" id="textarea" >${html}</textarea>`}
+   let textarea=document.getElementById("textarea");
+   textarea.addEventListener('blur',function(){
+
+    edittext.innerHTML=textarea.value;
+    localStorage.setItem('text',textarea.value);
+   })
+
+});*/
